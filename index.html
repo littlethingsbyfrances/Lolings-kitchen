@@ -125,7 +125,7 @@ main{max-width:1120px;margin:0 auto;padding:26px 16px 60px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
 /* ── ADMIN ── */
-.agrid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}.agrid-full{grid-column:1/-1;}
 @media(max-width:700px){.agrid{grid-template-columns:1fr;}}
 .acard{background:var(–card);border:1.5px solid var(–border);border-radius:16px;padding:20px;}
 .acard h3{font-family:‘Dancing Script’,cursive;font-size:1.35rem;color:var(–rose);margin-bottom:14px;display:flex;align-items:center;gap:7px;}
@@ -142,6 +142,9 @@ main{max-width:1120px;margin:0 auto;padding:26px 16px 60px;}
 .aform input,.aform select{width:100%;padding:9px 12px;border:2px solid var(–border);border-radius:10px;font-size:.88rem;font-family:‘Nunito’,sans-serif;background:var(–pink-pale);color:var(–text);outline:none;}
 .aform input:focus,.aform select:focus{border-color:var(–pink);}
 .btn-am{width:100%;margin-top:11px;padding:10px;background:linear-gradient(135deg,var(–pink),var(–rose));color:#fff;border:none;border-radius:50px;font-size:.88rem;font-family:‘Nunito’,sans-serif;font-weight:700;cursor:pointer;}
+.cfg-lbl{display:block;font-weight:700;font-size:.72rem;color:var(–rose);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;margin-top:8px;}
+.cfg-inp{width:100%;padding:8px 11px;border:2px solid var(–border);border-radius:8px;font-size:.82rem;font-family:‘Nunito’,sans-serif;background:#fff;color:var(–text);outline:none;}
+.cfg-inp:focus{border-color:var(–pink);}
 .btn-am:hover{opacity:.88;}
 .stats-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px;}
 .stat{text-align:center;padding:16px;background:var(–pink-pale);border-radius:12px;}
@@ -151,7 +154,7 @@ main{max-width:1120px;margin:0 auto;padding:26px 16px 60px;}
 .info-box strong{display:block;margin-bottom:3px;}
 
 /* ── MODALS ── */
-.ov{display:none;position:fixed;inset:0;background:rgba(80,80,80,.72);z-index:300;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(3px);}
+.ov{display:none;position:fixed;inset:0;background:#4a4a4a;z-index:300;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;}
 .ov.open{display:flex;}
 .modal{background:var(–card);border-radius:20px;width:100%;max-width:640px;margin:auto;box-shadow:0 40px 80px rgba(0,0,0,.4);overflow:hidden;animation:popIn .25s ease;}
 @keyframes popIn{from{opacity:0;transform:scale(.95) translateY(18px);}to{opacity:1;transform:scale(1) translateY(0);}}
@@ -319,6 +322,20 @@ main{padding:16px 11px 60px;}
         <button class="btn-am" onclick="addMember()">+ Add Family Member 🌸</button>
       </div>
     </div>
+      <div class="acard agrid-full" style="margin-top:0">
+      <h3>🔥 Firebase Configuration</h3>
+      <div class="info-box" style="margin-bottom:14px"><strong>ℹ️ When to change this</strong>Only update these values if you move to a new Firebase project. Changes take effect on next page load.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label class="cfg-lbl">API Key</label><input class="cfg-inp" id="adm-apiKey" /></div>
+        <div><label class="cfg-lbl">Auth Domain</label><input class="cfg-inp" id="adm-authDomain" /></div>
+        <div><label class="cfg-lbl">Database URL</label><input class="cfg-inp" id="adm-dbUrl" /></div>
+        <div><label class="cfg-lbl">Project ID</label><input class="cfg-inp" id="adm-projectId" /></div>
+        <div><label class="cfg-lbl">Storage Bucket</label><input class="cfg-inp" id="adm-storageBucket" /></div>
+        <div><label class="cfg-lbl">Messaging Sender ID</label><input class="cfg-inp" id="adm-messagingSenderId" /></div>
+        <div style="grid-column:1/-1"><label class="cfg-lbl">App ID</label><input class="cfg-inp" id="adm-appId" /></div>
+      </div>
+      <button class="btn-am" style="margin-top:14px;max-width:240px" onclick="saveAdminConfig()">💾 Save Firebase Config</button>
+    </div>
   </div>
 </div>
 ```
@@ -478,7 +495,7 @@ async function afterFirebase(){
 // ════════════════════════════════════════
 // BOOT — Firebase config pre-loaded
 // ════════════════════════════════════════
-const FIREBASE_CONFIG = {
+const FIREBASE_CONFIG_DEFAULT = {
   apiKey: "AIzaSyDT2n-oWS7ntIUsEs9tx-AHb31EpitkakM",
   authDomain: "lolings-kitchen.firebaseapp.com",
   databaseURL: "https://lolings-kitchen-default-rtdb.firebaseio.com",
@@ -487,6 +504,9 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "722721560201",
   appId: "1:722721560201:web:a75882c7a39cf4cb7e5858"
 };
+let _cfgOverride=null;
+try{_cfgOverride=JSON.parse(localStorage.getItem('lk_cfg_override')||'null');}catch{}
+const FIREBASE_CONFIG=_cfgOverride||FIREBASE_CONFIG_DEFAULT;
 
 (async()=>{
   const ok=await initFirebase(FIREBASE_CONFIG);
@@ -535,9 +555,11 @@ async function doLogin(){
 
 function launchApp(){
   document.getElementById('hero-user').textContent=`Welcome, ${currentUser.name} 👋`;
-  if(currentUser.role==='admin')document.getElementById('nav-adm').style.display='';
+  if(currentUser.role==='admin'){
+    document.getElementById('nav-adm').style.display='';
+    listenMembers();
+  }
   listenRecipes();
-  if(currentUser.role==='admin')listenMembers();
   showScreen('app-screen');
 }
 
@@ -574,6 +596,7 @@ function showPage(p){
   document.getElementById('page-'+p).classList.add('act');
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('act'));
   document.getElementById('nav-'+p)?.classList.add('act');
+  if(p==='adm') populateAdminConfig();
 }
 
 // ════════════════════════════════════════
@@ -751,6 +774,37 @@ async function removeMember(key){
   if(!m||!confirm(`Remove ${m.name}?`))return;
   await fbRemove(fbRef(db,`members/${key}`));
   showToast('Member removed');
+}
+
+// ════════════════════════════════════════
+// FIREBASE CONFIG IN ADMIN
+// ════════════════════════════════════════
+function populateAdminConfig(){
+  const cfg=FIREBASE_CONFIG;
+  document.getElementById('adm-apiKey').value=cfg.apiKey||'';
+  document.getElementById('adm-authDomain').value=cfg.authDomain||'';
+  document.getElementById('adm-dbUrl').value=cfg.databaseURL||'';
+  document.getElementById('adm-projectId').value=cfg.projectId||'';
+  document.getElementById('adm-storageBucket').value=cfg.storageBucket||'';
+  document.getElementById('adm-messagingSenderId').value=cfg.messagingSenderId||'';
+  document.getElementById('adm-appId').value=cfg.appId||'';
+}
+
+function saveAdminConfig(){
+  const newCfg={
+    apiKey:document.getElementById('adm-apiKey').value.trim(),
+    authDomain:document.getElementById('adm-authDomain').value.trim(),
+    databaseURL:document.getElementById('adm-dbUrl').value.trim(),
+    projectId:document.getElementById('adm-projectId').value.trim(),
+    storageBucket:document.getElementById('adm-storageBucket').value.trim(),
+    messagingSenderId:document.getElementById('adm-messagingSenderId').value.trim(),
+    appId:document.getElementById('adm-appId').value.trim(),
+  };
+  if(!newCfg.apiKey||!newCfg.databaseURL||!newCfg.projectId){
+    alert('Please fill in at least API Key, Database URL and Project ID.');return;
+  }
+  localStorage.setItem('lk_cfg_override',JSON.stringify(newCfg));
+  showToast('✅ Config saved! Reload the page to apply.');
 }
 
 // ════════════════════════════════════════
