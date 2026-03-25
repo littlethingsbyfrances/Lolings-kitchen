@@ -177,9 +177,6 @@ main{max-width:1120px;margin:0 auto;padding:26px 16px 60px;}
 .phint .ico{font-size:24px;margin-bottom:4px;}
 .phint p{font-weight:700;font-size:.82rem;}
 .phint small{color:var(–muted);font-size:.73rem;}
-.btn-ai-img{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none;padding:8px 16px;border-radius:50px;font-size:.8rem;font-family:‘Nunito’,sans-serif;font-weight:700;cursor:pointer;transition:opacity .2s;white-space:nowrap;}
-.btn-ai-img:hover{opacity:.88;}
-.btn-ai-img:disabled{opacity:.5;cursor:not-allowed;}
 .mftr{padding:14px 22px;border-top:1px solid var(–border);display:flex;justify-content:space-between;align-items:center;gap:8px;}
 .btn-del{background:none;color:var(–red);border:1.5px solid #fca5a5;padding:7px 13px;border-radius:50px;font-size:.78rem;font-family:‘Nunito’,sans-serif;font-weight:700;cursor:pointer;transition:all .2s;}
 .btn-del:hover{background:var(–red);color:#fff;border-color:var(–red);}
@@ -339,21 +336,7 @@ main{padding:16px 11px 60px;}
         <div><label class="cfg-lbl">Messaging Sender ID</label><input class="cfg-inp" id="adm-messagingSenderId" /></div>
         <div style="grid-column:1/-1"><label class="cfg-lbl">App ID</label><input class="cfg-inp" id="adm-appId" /></div>
       </div>
-      <hr style="border:none;border-top:1px solid var(--border);margin:20px 0;">
-      <h4 style="font-family:'Dancing Script',cursive;font-size:1.1rem;color:var(--rose);margin-bottom:8px;">✨ Anthropic API Key (for AI image generation)</h4>
-      <div class="info-box" style="margin-bottom:12px"><strong>ℹ️ How to get a key</strong>Go to <strong>console.anthropic.com</strong> → API Keys → Create Key. Free credits are included for new accounts.</div>
-      <div><label class="cfg-lbl">Anthropic API Key</label>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input class="cfg-inp" id="adm-apikey" type="password" placeholder="sk-ant-..." style="flex:1" />
-          <button type="button" onclick="toggleApiKeyVis()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:.8rem;color:var(--muted);" id="apikey-toggle">👁 Show</button>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
-        <button class="btn-am" style="max-width:240px" onclick="saveAdminConfig()">💾 Save Firebase Config</button>
-        <button class="btn-am" style="max-width:200px;background:linear-gradient(135deg,#7c3aed,#4f46e5);" onclick="saveApiKey()">✨ Save API Key</button>
-        <button class="btn-am" style="max-width:180px;background:linear-gradient(135deg,#059669,#047857);" onclick="testApiKey()">🧪 Test Key</button>
-      </div>
-      <div id="apikey-status" style="font-size:.82rem;margin-top:8px;display:none;padding:8px 12px;border-radius:8px;"></div>
+      <button class="btn-am" style="margin-top:14px;max-width:240px" onclick="saveAdminConfig()">💾 Save Firebase Config</button>
     </div>
   </div>
 </div>
@@ -385,22 +368,22 @@ main{padding:16px 11px 60px;}
           <div class="phint" id="f-phint"><div class="ico">📸</div><p>Click to upload a photo</p><small>JPG or PNG</small></div>
           <input type="file" id="f-photo-inp" accept="image/*" onchange="handlePhoto(this)" />
         </div>
-        <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
-          <button type="button" class="btn-ai-img" id="ai-img-btn" onclick="generateAIImage()">✨ Generate with AI</button>
-          <span id="ai-img-status" style="font-size:.78rem;color:var(--muted);font-style:italic;"></span>
-        </div>
-      </div>
-      <div class="fg"><label>Ingredients (one per line) *</label><textarea id="f-ing" placeholder="1 kg chicken&#10;1/2 cup soy sauce&#10;..."></textarea></div>
-      <div class="fg"><label>Instructions *</label><textarea id="f-ins" style="min-height:115px" placeholder="Step 1: ..."></textarea></div>
-      <div class="fg"><label>Loling's Notes / Story 💕</label><textarea id="f-notes" style="min-height:100px;font-size:1rem;" placeholder="e.g. Always served at every fiesta…"></textarea></div>
-    </div>
-    <div class="mftr">
-      <button class="btn-del" id="del-btn" style="display:none" onclick="deleteRecipe()">🗑 Delete</button>
-      <div style="display:flex;gap:7px;margin-left:auto">
-        <button class="btn-can" onclick="closeForm()">Cancel</button>
-        <button class="btn-save" onclick="saveRecipe()">Save Recipe 🌸</button>
-      </div>
-    </div>
+
+```
+  </div>
+  <div class="fg"><label>Ingredients (one per line) *</label><textarea id="f-ing" placeholder="1 kg chicken&#10;1/2 cup soy sauce&#10;..."></textarea></div>
+  <div class="fg"><label>Instructions *</label><textarea id="f-ins" style="min-height:115px" placeholder="Step 1: ..."></textarea></div>
+  <div class="fg"><label>Loling's Notes / Story 💕</label><textarea id="f-notes" style="min-height:100px;font-size:1rem;" placeholder="e.g. Always served at every fiesta…"></textarea></div>
+</div>
+<div class="mftr">
+  <button class="btn-del" id="del-btn" style="display:none" onclick="deleteRecipe()">🗑 Delete</button>
+  <div style="display:flex;gap:7px;margin-left:auto">
+    <button class="btn-can" onclick="closeForm()">Cancel</button>
+    <button class="btn-save" onclick="saveRecipe()">Save Recipe 🌸</button>
+  </div>
+</div>
+```
+
   </div>
 </div>
 
@@ -800,118 +783,6 @@ async function removeMember(key){
 }
 
 // ════════════════════════════════════════
-// API KEY MANAGEMENT
-// ════════════════════════════════════════
-function getApiKey(){
-  return localStorage.getItem('lk_anthropic_key')||'';
-}
-
-function toggleApiKeyVis(){
-  const inp=document.getElementById('adm-apikey');
-  const btn=document.getElementById('apikey-toggle');
-  if(inp.type==='password'){inp.type='text';btn.textContent='🙈 Hide';}
-  else{inp.type='password';btn.textContent='👁 Show';}
-}
-
-function saveApiKey(){
-  if(!currentUser||currentUser.role!=='admin'){alert('Only admins can set the API key.');return;}
-  const key=document.getElementById('adm-apikey').value.trim();
-  if(!key){alert('Please enter an API key.');return;}
-  if(!key.startsWith('sk-ant-')){alert('That does not look like a valid Anthropic API key. It should start with sk-ant-');return;}
-  localStorage.setItem('lk_anthropic_key',key);
-  showApiKeyStatus('✅ API key saved! AI image generation is now enabled.','#f0fdf4','#166534');
-  showToast('✅ API key saved!');
-}
-
-async function testApiKey(){
-  if(!currentUser||currentUser.role!=='admin'){return;}
-  const key=document.getElementById('adm-apikey').value.trim()||getApiKey();
-  if(!key){showApiKeyStatus('❌ No API key found. Please enter and save your key first.','#fef2f2','#991b1b');return;}
-  showApiKeyStatus('🧪 Testing key…','#eff6ff','#1e40af');
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:'Say OK'}]})
-    });
-    if(res.ok){showApiKeyStatus('✅ API key is working! AI image generation is ready.','#f0fdf4','#166534');}
-    else{const d=await res.json();showApiKeyStatus('❌ Key failed: '+(d.error?.message||res.status),'#fef2f2','#991b1b');}
-  }catch(e){
-    showApiKeyStatus('❌ Connection error: '+e.message,'#fef2f2','#991b1b');
-  }
-}
-
-function showApiKeyStatus(msg,bg,color){
-  const el=document.getElementById('apikey-status');
-  el.textContent=msg;el.style.background=bg;el.style.color=color;el.style.display='block';
-}
-
-// ════════════════════════════════════════
-// AI IMAGE GENERATION
-// ════════════════════════════════════════
-async function generateAIImage(){
-  const name=document.getElementById('f-name').value.trim();
-  const ing=document.getElementById('f-ing').value.trim();
-  if(!name){alert('Please enter a recipe name first!');return;}
-
-  const apiKey=getApiKey();
-  if(!apiKey){
-    alert('No API key set!\n\nGo to Admin → Firebase Configuration → paste your Anthropic API key and click Save API Key.');
-    return;
-  }
-
-  const btn=document.getElementById('ai-img-btn');
-  const status=document.getElementById('ai-img-status');
-  btn.disabled=true;
-  btn.textContent='✨ Generating…';
-  status.textContent='Creating illustration…';
-
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':apiKey,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body:JSON.stringify({
-        model:'claude-haiku-4-5-20251001',
-        max_tokens:2000,
-        messages:[{role:'user',content:`Create a beautiful, appetising SVG illustration (viewBox="0 0 400 300") of "${name}" — a Filipino dish. Ingredients include: ${ing||'not specified'}. Make it colourful and food-styled with warm colours. Show the food in a bowl or plate with garnish and a warm background. Output ONLY the raw SVG code starting with <svg and ending with </svg>. No markdown, no explanation.`}]
-      })
-    });
-
-    if(!res.ok){
-      const err=await res.json();
-      throw new Error(err.error?.message||'API error '+res.status);
-    }
-
-    const data=await res.json();
-    let svgCode=data.content[0].text.trim();
-    svgCode=svgCode.replace(/^```[a-z]*\n?/,'').replace(/\n?```$/,'').trim();
-    if(!svgCode.startsWith('<svg')){
-      const match=svgCode.match(/<svg[\s\S]*<\/svg>/);
-      if(match)svgCode=match[0];
-      else throw new Error('No valid SVG in response');
-    }
-
-    const svgB64=btoa(unescape(encodeURIComponent(svgCode)));
-    curPhoto='data:image/svg+xml;base64,'+svgB64;
-    const pp=document.getElementById('f-pprev');
-    pp.src=curPhoto;pp.style.display='block';
-    document.getElementById('f-phint').style.display='none';
-    status.textContent='✅ AI illustration ready!';
-    btn.textContent='✨ Regenerate';
-  }catch(e){
-    console.error('AI image error:',e);
-    status.textContent='❌ '+e.message;
-    btn.textContent='✨ Generate with AI';
-  }
-  btn.disabled=false;
-}
-
-// ════════════════════════════════════════
 // FIREBASE CONFIG IN ADMIN
 // ════════════════════════════════════════
 function populateAdminConfig(){
@@ -926,9 +797,7 @@ function populateAdminConfig(){
     document.getElementById('adm-storageBucket').value=cfg.storageBucket||'';
     document.getElementById('adm-messagingSenderId').value=cfg.messagingSenderId||'';
     document.getElementById('adm-appId').value=cfg.appId||'';
-    // Populate API key if saved
-    const savedKey=getApiKey();
-    if(savedKey) document.getElementById('adm-apikey').value=savedKey;
+
   } else {
     cfgCard.style.display='none';
   }
