@@ -876,8 +876,8 @@ async function generateAIImage(){
         'anthropic-dangerous-direct-browser-access':'true'
       },
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:2500,
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:2000,
         messages:[{role:'user',content:`Create a beautiful, appetising SVG illustration (viewBox="0 0 400 300") of "${name}" — a Filipino dish. Ingredients include: ${ing||'not specified'}. Make it colourful and food-styled with warm colours. Show the food in a bowl or plate with garnish and a warm background. Output ONLY the raw SVG code starting with <svg and ending with </svg>. No markdown, no explanation.`}]
       })
     });
