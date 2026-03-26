@@ -65,6 +65,8 @@ hr.div{border:none;border-top:1px solid var(–border);margin:18px 0;}
 .lf input{width:100%;padding:12px 16px;border:2px solid var(–border);border-radius:50px;font-size:.92rem;font-family:‘Nunito’,sans-serif;background:var(–pink-pale);color:var(–text);outline:none;transition:border-color .2s;}
 .lf input:focus{border-color:var(–pink);}
 .first-note{margin-top:14px;font-size:.75rem;color:#aaa;display:none;}
+.btn-google{width:100%;padding:12px 16px;background:#fff;color:#3c4043;border:2px solid #dadce0;border-radius:50px;font-size:.92rem;font-family:‘Nunito’,sans-serif;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,box-shadow .2s;}
+.btn-google:hover{background:#f8f9fa;box-shadow:0 2px 8px rgba(0,0,0,.15);}
 .first-note strong{color:var(–pink);}
 
 /* ── APP ── */
@@ -257,6 +259,15 @@ main{padding:16px 11px 60px;}
     <div class="lf"><label>Email Address</label><input type="email" id="l-email" placeholder="e.g. maria@gmail.com" /></div>
     <div class="lf"><label>Password</label><input type="password" id="l-pw" placeholder="Your password" /></div>
     <button class="btn-main" onclick="doLogin()">Enter the Kitchen 🌸</button>
+    <div style="display:flex;align-items:center;gap:10px;margin:14px 0;">
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+      <span style="font-size:.75rem;color:#bbb">or</span>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+    <button class="btn-google" onclick="doGoogleLogin()">
+      <svg width="18" height="18" viewBox="0 0 48 48" style="margin-right:8px;flex-shrink:0"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+      Sign in with Google
+    </button>
     <div class="err-msg" id="l-err">Email or password not recognised.</div>
     <p class="first-note" id="first-note">No family members yet — <strong>you'll be set up as Admin!</strong></p>
     <p style="margin-top:14px;font-size:.72rem;color:#bbb;cursor:pointer;" onclick="showConfig()">⚙️ Change Firebase settings</p>
@@ -475,12 +486,17 @@ async function initFirebase(cfg){
   try{
     const {initializeApp}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
     const {getDatabase,ref,set,get,push,remove,onValue}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
-    // Use unique app name to avoid duplicate app errors on re-init
+    const {getAuth,signInWithPopup,GoogleAuthProvider,signOut,onAuthStateChanged}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
     const appName='lk-'+Date.now();
     const app=initializeApp(cfg,appName);
     db=getDatabase(app);
     fbRef=ref;fbSet=set;fbGet=get;fbPush=push;fbRemove=remove;fbOn=onValue;
-    // Test connection
+    // Store auth globals
+    window._auth=getAuth(app);
+    window._googleProvider=new GoogleAuthProvider();
+    window._signInWithPopup=signInWithPopup;
+    window._signOut=signOut;
+    window._onAuthStateChanged=onAuthStateChanged;
     await get(ref(db,'_ping'));
     return true;
   }catch(e){
@@ -751,7 +767,7 @@ function renderMembers(){
   if(!arr.length){list.innerHTML='<p style="color:var(--muted);font-size:.84rem">No members yet.</p>';return;}
   list.innerHTML=arr.map(([k,m])=>`
     <div class="mrow">
-      <div><div class="mname">${m.name} <span class="badge ${m.role==='admin'?'ba':'bm'}">${m.role}</span></div>
+      <div><div class="mname">${m.name} <span class="badge ${m.role==='admin'?'ba':'bm'}">${m.role}</span> ${m.authType==='google'?'<span style="font-size:.68rem;background:#fff0f0;color:#ea4335;padding:1px 6px;border-radius:50px;font-weight:700;">G</span>':''}</div>
       <div class="mrole">${m.email||''}</div></div>
       ${k!==currentUser.key?`<button class="btn-rm" onclick="removeMember('${k}')">Remove</button>`:'<span style="font-size:.72rem;color:var(--muted)">You</span>'}
     </div>`).join('');
