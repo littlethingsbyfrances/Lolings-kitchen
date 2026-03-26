@@ -505,11 +505,9 @@ async function initFirebase(cfg){
       const gb=document.getElementById('google-btn');
       if(gb)gb.style.display='none';
     }
-    // Test DB connection
-    await get(ref(db,'_ping'));
     return true;
   }catch(e){
-    console.error('Firebase init error:',e);
+    console.error('Firebase init error:',e.message||e);
     return false;
   }
 }
@@ -543,7 +541,8 @@ const FIREBASE_CONFIG=_cfgOverride||FIREBASE_CONFIG_DEFAULT;
   const ok=await initFirebase(FIREBASE_CONFIG);
   if(!ok){
     showScreen('config-screen');
-    document.getElementById('cfg-err').textContent='Could not connect to Firebase. Please check your internet connection.';
+    // Try to get the real error from console
+    document.getElementById('cfg-err').textContent='Could not connect to Firebase. Open browser console (F12) and look for the red error to share with your developer.';
     document.getElementById('cfg-err').style.color='var(--red)';
     document.getElementById('cfg-err').style.display='block';
     return;
