@@ -5,6 +5,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Loling's Kitchen</title>
+<!-- Firebase SDKs loaded via script tags for reliability -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -484,24 +488,39 @@ async function trySaveConfig(){
 
 async function initFirebase(cfg){
   try{
-    const {initializeApp}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
-    const {getDatabase,ref,set,get,push,remove,onValue}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
-    const appName='lk-'+Date.now();
-    const app=initializeApp(cfg,appName);
-    db=getDatabase(app);
-    fbRef=ref;fbSet=set;fbGet=get;fbPush=push;fbRemove=remove;fbOn=onValue;
-    // Load auth separately — non-fatal if it fails
+    // Wait for Firebase compat SDK to be ready
+    if(!window.firebase){
+      throw new Error('Firebase SDK not loaded. Check internet connection.');
+    }
+    // Init app (avoid duplicate app error)
+    let app;
     try{
-      const {getAuth,signInWithPopup,GoogleAuthProvider,signOut}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
-      window._auth=getAuth(app);
-      window._googleProvider=new GoogleAuthProvider();
-      window._signInWithPopup=signInWithPopup;
-      window._signOut=signOut;
+      app=firebase.app('lolings');
+    }catch(e){
+      app=firebase.initializeApp(cfg,'lolings');
+    }
+    // Database
+    const dbInst=firebase.database(app);
+    db={};
+    // Map compat API to our internal API style
+    fbRef=(path)=>dbInst.ref(path);
+    fbSet=async(r,val)=>r.set(val);
+    fbGet=async(r)=>{const s=await r.once('value');return{val:()=>s.val()};};
+    fbPush=(r)=>{const nr=r.push();return{key:nr.key,_ref:nr};};
+    fbRemove=async(r)=>r.remove();
+    fbOn=(r,cb)=>r.on('value',snap=>{cb({val:()=>snap.val()});});
+    // Auth
+    try{
+      const auth=firebase.auth(app);
+      const provider=new firebase.auth.GoogleAuthProvider();
+      window._auth=auth;
+      window._googleProvider=provider;
+      window._signInWithPopup=(a,p)=>a.signInWithPopup(p);
+      window._signOut=(a)=>a.signOut();
       window._googleAuthReady=true;
     }catch(authErr){
       console.warn('Google Auth not available:',authErr);
       window._googleAuthReady=false;
-      // Hide Google button if auth fails to load
       const gb=document.getElementById('google-btn');
       if(gb)gb.style.display='none';
     }
@@ -734,7 +753,7 @@ async function saveRecipe(){
     instructions,notes:document.getElementById('f-notes').value.trim(),
     photo:curPhoto||null,addedBy:currentUser.name,updatedAt:Date.now(),
   };
-  const id=editId||fbPush(fbRef(db,'recipes')).key;
+  const id=editId||fbPush(fbRef(db,'recipes'))._ref.key;
   await fbSet(fbRef(db,`recipes/${id}`),recipe);
   closeForm();showToast(editId?'✅ Recipe updated!':'🌸 Recipe added!');
 }
