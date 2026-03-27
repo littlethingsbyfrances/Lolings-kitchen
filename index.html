@@ -490,6 +490,8 @@ async function initFirebase(cfg){
     }
     return true;
   }catch(e){
+    // Show exact error on screen so we can debug without dev tools
+    window._lastFirebaseError=e.message||String(e);
     console.error('Firebase init error:',e.message||e);
     return false;
   }
@@ -542,9 +544,10 @@ const FIREBASE_CONFIG=FIREBASE_CONFIG_DEFAULT;
     await new Promise(r=>setTimeout(r,2000));
   }
 
-  // All attempts failed — show friendly error
+  // All attempts failed — show exact error on screen
   document.getElementById('loading-msg').textContent='Could not connect.';
-  document.getElementById('cfg-err').textContent='Please check your internet connection and tap Retry.';
+  const errDetail=window._lastFirebaseError||'Unknown error';
+  document.getElementById('cfg-err').innerHTML='<strong>Error:</strong> '+errDetail+'<br><br>Please screenshot this and send to your developer.';
   document.getElementById('cfg-err').style.color='var(--red)';
   document.getElementById('cfg-err').style.display='block';
   document.getElementById('retry-btn').style.display='block';
