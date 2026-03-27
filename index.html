@@ -525,32 +525,33 @@ const FIREBASE_CONFIG=FIREBASE_CONFIG_DEFAULT;
   showScreen('config-screen');
   document.getElementById('loading-msg').textContent='Connecting to Loling\'s Kitchen…';
 
-  let attempts=0;
-  const maxAttempts=3;
+  const setMsg=t=>document.getElementById('loading-msg').textContent=t;
+  const setErr=t=>{
+    const e=document.getElementById('cfg-err');
+    e.innerHTML=t;e.style.color='var(--red)';e.style.display='block';
+    document.getElementById('retry-btn').style.display='block';
+  };
 
-  while(attempts < maxAttempts){
-    attempts++;
-    document.getElementById('loading-msg').textContent=
-      attempts===1?'Connecting…':
-      attempts===2?'Retrying connection…':
-      'One more try…';
+  // Step 1: Check Firebase SDK loaded
+  setMsg('Step 1: Checking Firebase SDK…');
+  await new Promise(r=>setTimeout(r,500));
+  if(!window.firebase){
+    setErr('❌ Firebase SDK failed to load.<br>This usually means an internet/network issue or a browser content blocker.<br><br>Try: disable any ad blockers, then reload.');
+    return;
+  }
+  setMsg('Step 2: Connecting to database…');
+  await new Promise(r=>setTimeout(r,500));
 
-    const ok=await initFirebase(FIREBASE_CONFIG);
-    if(ok){
-      await afterFirebase();
-      return;
-    }
-    // Wait 2 seconds before retry
-    await new Promise(r=>setTimeout(r,2000));
+  // Step 2: Try Firebase init
+  const ok=await initFirebase(FIREBASE_CONFIG);
+  if(!ok){
+    const errDetail=window._lastFirebaseError||'Unknown error';
+    setErr('❌ Database connection failed.<br><br><strong>Error:</strong> '+errDetail+'<br><br>Screenshot this and send to your developer.');
+    return;
   }
 
-  // All attempts failed — show exact error on screen
-  document.getElementById('loading-msg').textContent='Could not connect.';
-  const errDetail=window._lastFirebaseError||'Unknown error';
-  document.getElementById('cfg-err').innerHTML='<strong>Error:</strong> '+errDetail+'<br><br>Please screenshot this and send to your developer.';
-  document.getElementById('cfg-err').style.color='var(--red)';
-  document.getElementById('cfg-err').style.display='block';
-  document.getElementById('retry-btn').style.display='block';
+  setMsg('Step 3: Loading recipes…');
+  await afterFirebase();
 })();
 
 // ════════════════════════════════════════
